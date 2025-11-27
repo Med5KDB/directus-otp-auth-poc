@@ -1,0 +1,22 @@
+services:
+    directus:
+        image: directus/directus:11.5.1
+        ports:
+            - 8055:8055
+        volumes:
+            - ./database:/directus/database
+            - ./uploads:/directus/uploads
+            - ./extensions:/directus/extensions
+        environment:
+            SECRET: "directus_secret_to_sign_access_tokens"
+            DB_CLIENT: "sqlite3"
+            DB_FILENAME: "/directus/database/data.db"
+            WEBSOCKETS_ENABLED: "true"
+            CORS_ENABLED: "true"
+            CORS_ORIGIN: "http://localhost:5173"
+            ADMIN_EMAIL: "mlamine@yopmail.com"
+            ADMIN_PASSWORD: "passer123"
+            # Configuration Twilio (optionnel - si non défini, les codes seront affichés dans les logs)
+            # TWILIO_ACCOUNT_SID: "your_account_sid"
+            # TWILIO_AUTH_TOKEN: "your_auth_token"
+            # TWILIO_PHONE_NUMBER: "+33123456789"
