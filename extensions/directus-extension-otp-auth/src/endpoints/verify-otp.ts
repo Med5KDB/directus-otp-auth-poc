@@ -14,7 +14,6 @@ export async function verifyOTP(
   try {
     const { phone, code }: VerifyOTPPayload = req.body;
 
-    // Validation
     if (!phone || !code) {
       res.status(400).json({
         success: false,
@@ -26,7 +25,6 @@ export async function verifyOTP(
     const normalizedPhone = phone.trim().replace(/\s+/g, '');
     const normalizedCode = code.trim();
 
-    // Vérifier que le code est bien à 6 chiffres
     if (!/^\d{6}$/.test(normalizedCode)) {
       res.status(400).json({
         success: false,
@@ -35,7 +33,6 @@ export async function verifyOTP(
       return;
     }
 
-    // Récupérer le code OTP le plus récent
     const otpStorage = new OTPStorage(database);
     const otpRecord = await otpStorage.getLatestByPhone(normalizedPhone);
 
@@ -47,7 +44,6 @@ export async function verifyOTP(
       return;
     }
 
-    // Vérifier si le code a expiré
     if (OTPGenerator.isExpired(otpRecord.expires_at)) {
       res.status(400).json({
         success: false,
@@ -56,7 +52,6 @@ export async function verifyOTP(
       return;
     }
 
-    // Vérifier le nombre de tentatives
     if (otpRecord.attempts >= MAX_ATTEMPTS) {
       res.status(429).json({
         success: false,
@@ -65,11 +60,9 @@ export async function verifyOTP(
       return;
     }
 
-    // Vérifier le code
     const isValidCode = await OTPGenerator.verifyCode(normalizedCode, otpRecord.code);
 
     if (!isValidCode) {
-      // Incrémenter les tentatives
       const newAttempts = await otpStorage.incrementAttempts(otpRecord.id!);
       const remainingAttempts = MAX_ATTEMPTS - newAttempts;
 
@@ -82,10 +75,8 @@ export async function verifyOTP(
       return;
     }
 
-    // Code valide ! Marquer comme utilisé
     await otpStorage.markAsUsed(otpRecord.id!);
 
-    // Récupérer les informations utilisateur depuis la collection User
     const user = await database('User')
       .where({ id: otpRecord.user_id })
       .first();
@@ -125,7 +116,7 @@ export async function verifyOTP(
     // Nettoyer les codes expirés (maintenance)
     await otpStorage.cleanupExpired();
 
-    // Succès !
+
     res.status(200).json({
       success: true,
       message: 'Authentification réussie',

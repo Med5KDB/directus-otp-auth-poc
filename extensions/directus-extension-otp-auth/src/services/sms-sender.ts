@@ -76,7 +76,7 @@ export class SMSSender {
    * Vérifie si le service SMS est configuré et fonctionnel
    */
   isConfigured(): boolean {
-    return this.enabled;
+    return this.twilioConfigured;
   }
 }
 

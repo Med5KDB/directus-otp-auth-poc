@@ -6070,7 +6070,7 @@ Ce code expire dans 5 minutes.`;
    * Vérifie si le service SMS est configuré et fonctionnel
    */
   isConfigured() {
-    return this.enabled;
+    return this.twilioConfigured;
   }
 }
 
