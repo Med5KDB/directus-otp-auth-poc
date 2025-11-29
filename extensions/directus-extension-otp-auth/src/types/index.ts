@@ -34,8 +34,11 @@ export interface AuthResponse extends OTPResponse {
 
 export interface DirectusUser {
   id: string;
-  email: string;
-  phone?: string;
+  email: string | null;
+  phone?: string | null;
   status: string;
+  role: string | null;
+  first_name: string | null;
+  last_name: string | null;
 }
 

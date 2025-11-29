@@ -7,10 +7,11 @@ import type { RequestOTPPayload, OTPResponse } from "../types";
 export async function requestOTP(
   req: Request,
   res: Response,
-  { database, services, getSchema }: any
+  { database, services, getSchema, env }: any
 ): Promise<void> {
   try {
     const { phone }: RequestOTPPayload = req.body;
+    console.log("phone", phone);
 
     if (!phone) {
       res.status(400).json({
@@ -30,14 +31,37 @@ export async function requestOTP(
       return;
     }
 
-    const user = await database("User")
+    const user = await database("directus_users")
       .where({ phone: normalizedPhone })
       .first();
+
+      console.log("user", JSON.stringify(user, null, 2));
 
     if (!user) {
       res.status(404).json({
         success: false,
         error: "Aucun utilisateur trouvé avec ce numéro de téléphone",
+      } as OTPResponse);
+      return;
+    }
+
+    if (user.status !== 'active') {
+      res.status(403).json({
+        success: false,
+        error: "Le compte utilisateur n'est pas actif",
+      } as OTPResponse);
+      return;
+    }
+
+    
+    const role = await database("directus_roles")
+      .where({ id: user.role })
+      .first();
+
+    if (!role || role.name !== 'App User') {
+      res.status(403).json({
+        success: false,
+        error: "Accès refusé. Seuls les utilisateurs avec le rôle 'App User' peuvent utiliser cette fonctionnalité",
       } as OTPResponse);
       return;
     }
